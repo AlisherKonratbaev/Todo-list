@@ -1,3 +1,4 @@
+sessionStorage.clear();
 
 const authEl = document.querySelector("#auth");
 const loginEl = document.querySelector("#login");

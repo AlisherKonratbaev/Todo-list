@@ -138,6 +138,7 @@ header .dropdown {
 }
 .todo-wrap .item .note__title{
 	width: 60%;
+	font-size: 18px;
 }
 .todo-wrap .item .note__date{
 	margin: 0;
@@ -147,14 +148,32 @@ header .dropdown {
 }
 .todo-wrap .item .dots {
 	width: 20px;
-	height: 20px;
+	height: 18px;
 	border-radius: 50%;
-	background: #dc3545;
+	background: #ffc107;
 	margin-right: 50px;
+}
+.todo-wrap .item .dots.important {
+	background: #dc3545;
+}
+.todo-wrap .item .dots.done {
+	background: #198754;
+}
+.todo-wrap .item p.done{
+	text-decoration: line-through;
 }
 .todo-wrap .item .delate{
 	margin-right: 40px;
 }
 .todo-wrap .item .edit {
 	
+}
+.form-wrap .message {
+	position: absolute;
+	top: -20px;
+	left: 24px;
+	color: #dc3545;
+}
+.relative {
+	position: relative;
 }
