@@ -86,11 +86,11 @@ function showNotes() {
     if(!userNotes) return;
     const notesWrap = document.querySelector(".todo-wrap");
     let notesHtml = userNotes.notes.map(note => {
-        let dotsClass = note.important ? "important" : "";
+        let important = note.important ? "important" : "";
         let done = note.status == "done" ? "done" : "";
         return `
                 <div class="item" data-index = "${note.id}">
-                    <span class="dots ${dotsClass} ${done}"></span>
+                    <span class="dots ${important} ${done}"></span>
                     <p class="note__title ${done}">${note.title}</p>
                     <p class="note__date ${done}">${note.date}</p>
                     <button type="button" class="btn btn-danger delate">Delate</button>
