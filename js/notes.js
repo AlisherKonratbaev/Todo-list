@@ -86,7 +86,7 @@ export class Note {
 
             let title = this.noteTitle.value.trim();
             if (title == "") {
-                this.showMessage(this.noteTitle, "Fill in the title field");
+                this.showMessage(this.noteTitle, "message" ,"Fill in the title field");
                 return;
             }
             
@@ -106,6 +106,7 @@ export class Note {
 
             this.clearInputs();
             this.showNotes();
+            this.showNotification("notification" ,"Note added");
         })
 
     }
@@ -120,6 +121,7 @@ export class Note {
                 let index = e.target.parentElement.dataset.index;
 
                 this.local.changeStatus(this.notesDB, this.user, index);
+                
             }
         })
     }
@@ -129,8 +131,8 @@ export class Note {
             if (e.target.classList.contains("delate")) {
                 let index = e.target.parentElement.dataset.index;
                 e.target.parentElement.remove();
-
-                this.local.delateNote(this.notesDB, this.user, index)
+                this.local.delateNote(this.notesDB, this.user, index);
+                this.showNotification("notification" ,"Note deleted");
             }
         });
     }
@@ -183,7 +185,7 @@ export class Note {
                 newDate = this.getDateFormat(newDate)
                 let newTitle = formEl[1].value.trim();
                 if (newTitle == "") {
-                    this.showMessage(formEl[0], "Fill in the title field.")
+                    this.showMessage(formEl[0], "message", "Fill in the title field.")
                     return;
                 }
                 let important = formEl[2].checked;
@@ -196,11 +198,12 @@ export class Note {
                 };
 
                 this.local.editNote(this.notesDB, this.user, newNote);
-
+                
                 modal.remove();
                 this.overlay.classList.remove("show");
-
+                this.showNotification("notification" ,"Note changed");
                 this.showNotes();
+                
             });
         });
     }
@@ -250,9 +253,27 @@ export class Note {
         })
     }
 
-    showMessage(element, text) {
+    showNotification(className, text) {
         const message = document.createElement("p");
-        message.classList.add("message");
+        message.classList.add(className);
+        message.textContent = text;
+        this.notesWrap.insertAdjacentElement("afterend", message);
+        setTimeout(() =>{
+            message.style.right = "1px";
+        }, 250);
+        setTimeout(() => {
+            message.style.right = "-175px";
+
+            setTimeout(() =>{
+                message.remove();
+            }, 500);
+
+        }, 2000);
+
+    }
+    showMessage(element, className, text) {
+        const message = document.createElement("p");
+        message.classList.add(className);
         message.textContent = text;
         element.insertAdjacentElement("afterend", message);
         setTimeout(() => {

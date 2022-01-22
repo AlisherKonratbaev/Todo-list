@@ -146,10 +146,11 @@ export class Authorization {
 export class Settings {
 
     constructor() {
-        if (window.location.href != `${window.location.origin}/user.html`) {
-            return;
-        }
+        if (window.location.href != `${window.location.origin}/user.html`) return;
+
         this.local = new LocalData();
+        if(!this.local.sessionGetUser()) window.location.href = `${window.location.origin}/auth.html`;
+
         this.initDOMElemets();
         this.update();
     }
