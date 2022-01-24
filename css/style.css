@@ -77,7 +77,7 @@ body {
 }
 
 #msform .exit{
-	background: #dc3545;
+	background: #dc3545 !important;
 }
 
 #msform .action-button:hover,

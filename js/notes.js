@@ -4,7 +4,7 @@ import { LocalData } from "./data.js";
 export class Note {
 
     constructor() {
-        if (window.location.href != `${window.location.origin}/notes.html`) {
+        if (!window.location.href.includes("notes.html")) {
             return;
         }
         this.local = new LocalData();
@@ -16,7 +16,7 @@ export class Note {
 
     verify() {
         this.user = this.local.sessionGetUser();
-        if (!this.user) window.location.href = `${window.location.origin}/auth.html`;
+        if (!this.user) window.location.href = `./auth.html`;
     }
 
     initDOMElemets() {

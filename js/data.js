@@ -13,11 +13,10 @@ export class LocalData {
     updateAllUsers(users) {
         localStorage.setItem("users", JSON.stringify(users));
     }
-    updateUser(users, oldUser, newUser) {
+    updateUser(users, currentUser, newPass) {
         users.forEach(user =>{
-            if(user.login == oldUser.login) {
-                user.login = newUser.login;
-                user.pass = newUser.pass;
+            if(user.login == currentUser.login) {
+                user.pass = newPass;
             }
         })
         this.updateAllUsers(users);
@@ -89,17 +88,6 @@ export class LocalData {
         });
 
         this.updateNotesDB(notesDB);
-    }
-
-    
-    updateUserInNotesDB(noteDB, oldUser, newUser) {
-        noteDB.forEach(item =>{
-            if(item.user == oldUser.login) {
-                item.user = newUser.login;
-            }
-        });
-
-        this.updateNotesDB(noteDB);
     }
 
     updateNotesDB(notesDB) {

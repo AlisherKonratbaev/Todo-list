@@ -4,7 +4,7 @@ import { LocalData } from "./data.js";
 export class Registration {
 
     constructor() {
-        if (window.location.href != `${window.location.origin}/reg.html`) {
+        if (!window.location.href.includes("reg.html")) {
             return;
         }
         this.local = new LocalData();
@@ -89,7 +89,7 @@ export class Registration {
 export class Authorization {
 
     constructor() {
-        if (window.location.href != `${window.location.origin}/auth.html`) {
+        if (!window.location.href.includes("auth.html")) {
             return;
         }
         this.local = new LocalData();
@@ -146,10 +146,10 @@ export class Authorization {
 export class Settings {
 
     constructor() {
-        if (window.location.href != `${window.location.origin}/user.html`) return;
+        if (!window.location.href.includes("user.html")) return;
 
         this.local = new LocalData();
-        if(!this.local.sessionGetUser()) window.location.href = `${window.location.origin}/auth.html`;
+        if (!this.local.sessionGetUser()) window.location.href = `./auth.html`;
 
         this.initDOMElemets();
         this.update();
@@ -170,6 +170,8 @@ export class Settings {
         this.loginEl.value = this.user.login;
         this.passwordInputs.forEach(passEl => {
             passEl.value = this.user.pass;
+            // passEl.type = "text";
+            // this.checkboxEl.checked = "true";
         });
         this.showPassword();
         this.exit();
@@ -187,7 +189,7 @@ export class Settings {
     exit() {
         this.exitBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            window.location.href = `${window.location.origin}/notes.html`;
+            window.location.href = `./notes.html`;
         });
     }
     save() {
@@ -195,42 +197,34 @@ export class Settings {
             e.preventDefault();
             const pass = this.passwordInputs[0].value;
             const cpass = this.passwordInputs[1].value;
-            const login = this.loginEl.value.trim();
+            const login = this.user.login;
 
 
             if (pass == "") {
                 this.showMessage(this.passwordInputs[0], "password is empty !")
+                return;
             } else if (pass != cpass) {
                 this.showMessage(this.passwordInputs[0], "Password mismatch !");
-            } else if (login == "") {
-                this.showMessage(this.loginEl, "Login is empty !");
-            } else {
+                return;
+            } else if (pass == this.user.pass) {
+                window.location.href = `./notes.html`;
+                return;
+            }
+            const newPass = pass;
 
-                let userUpdate = {
-                    login,
-                    pass,
-                }
-
-                let noteDB = this.local.getNotesDB();
-                const users = this.local.getUsers();
-
-                const findUser = users.filter(user =>user.login != this.user.login)
-                                      .find(user => user.login == userUpdate.login);
-
-                if (findUser){
-                    this.showMessage(this.loginEl, "Login is already taken");
-                    return;
-                } 
-                else {
-                    this.local.updateUser(users, this.user, userUpdate);
-                    this.local.updateUserInNotesDB(noteDB, this.user, userUpdate)
-                    this.local.sessionClear();
-                    this.local.sessionUpdate(userUpdate);
-                }
-
-                window.location.href = "notes.html";
+            let userUpdate = {
+                login,
+                pass: newPass,
             }
 
+            const users = this.local.getUsers();
+            this.local.updateUser(users, this.user, newPass);
+
+            this.local.sessionClear();
+            this.local.sessionUpdate(userUpdate);
+
+            window.location.href = "./notes.html";
+            
         });
     }
 
