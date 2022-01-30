@@ -20,9 +20,9 @@
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#" id="header__title">Dashboard</a>
 
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" id="user__login" type="button" id="dropdown1" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                
+            <button class="btn btn-secondary dropdown-toggle" id="user__login" type="button" id="dropdown1"
+                data-bs-toggle="dropdown" aria-expanded="false">
+
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdown1">
                 <li><a class="dropdown-item" href="./auth.html">Logout</a></li>
@@ -40,7 +40,7 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link"  href="./notes.html">
+                            <a class="nav-link" href="./notes.html">
                                 <span data-feather="home"></span>
                                 All Tasks
                             </a>
@@ -58,7 +58,7 @@
 
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div class="d-flex pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">To do List</h1>
+                    <h1 class="h2">Categories</h1>
                 </div>
                 <div class="form-wrap border-bottom">
                     <form action="" id="add-note" class="add-note row">
@@ -80,14 +80,20 @@
                         </div>
                     </form>
                 </div>
-                <div class="search-wrap">
-                    <input class="form-control" id="search-note" type="text" placeholder="Search ..."
-                        aria-label="default input example">
+                <div class="categories">
+                    <div class="cat-title">
+                        <h5 class="category__title">In process</h5>
+                        <h5 class="category__title">Important</h5>
+                        <h5 class="category__title">Done</h5>
+                    </div>
+
+                    <div class="category-wrap">
+                        <div class="category__item" data-category="warning"></div>
+                        <div class="category__item" data-category="important"></div>
+                        <div class="category__item" data-category="done"></div>
+                    </div>
                 </div>
 
-                <div class="todo-wrap">
-
-                </div>
 
 
             </main>

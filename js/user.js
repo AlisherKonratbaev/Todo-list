@@ -4,16 +4,20 @@ import { LocalData } from "./data.js";
 export class Registration {
 
     constructor() {
-        if (!window.location.href.includes("reg.html")) {
-            return;
-        }
         this.local = new LocalData();
-        this.initDOMElemets();
-        this.creatUser();
+        if (this.verify()) {
+            this.initDOMElemets();
+            this.creatUser();
+        }
     }
 
 
-
+    verify() {
+        if (!window.location.href.includes("reg.html")) {
+            return false;
+        }
+        return true;
+    }
     initDOMElemets() {
 
         this.formEl = document.querySelector("#msform");
@@ -26,7 +30,7 @@ export class Registration {
     creatUser() {
 
         this.showPassword();
-
+        this.users = this.local.getUsers();
 
         this.btnEl.addEventListener("click", (e) => {
             e.preventDefault();
@@ -43,25 +47,37 @@ export class Registration {
                 this.showMessage(this.loginEl, "Login is empty !")
             } else {
 
-                let userTemp = {
+                let id, usersCount = this.users.length;
+                if (usersCount != 0) id = this.users[usersCount - 1].id + 1;
+                else id = usersCount;
+
+                let newUser = {
+                    id,
                     login,
                     pass,
+                    role: "user",
+                    permissions: { canAdd: true, canEdit: true, canDelete: true }
                 }
 
-                const users = this.local.getUsers();
-                const findUser = users.find(user => user.login == userTemp.login);
-
-                if (!findUser) users.push(userTemp);
-                else {
+                this.addUser(newUser) ?
+                    window.location.href = "auth.html" :
                     this.showMessage(this.loginEl, "Login is already taken");
-                    return;
-                }
-
-                this.local.updateAllUsers(users);
-                window.location.href = "auth.html";
             }
 
         });
+    }
+    addUser(newUser) {
+        let creat = false;
+        const users = this.local.getUsers();
+        const findUser = users.find(user => user.login == newUser.login);
+
+        if (!findUser) {
+            this.local.addNewUser(users, newUser);
+            creat = true;
+        } else {
+            creat = false;
+        }
+        return creat;
     }
 
     showPassword() {
@@ -140,6 +156,8 @@ export class Authorization {
         }, 2000);
     }
 
+
+
 }
 
 
@@ -197,8 +215,11 @@ export class Settings {
             e.preventDefault();
             const pass = this.passwordInputs[0].value;
             const cpass = this.passwordInputs[1].value;
-            const login = this.user.login;
 
+            const login = this.user.login;
+            const id = this.user.id;
+            const role = this.user.role;
+            const permissions = this.user.permissions
 
             if (pass == "") {
                 this.showMessage(this.passwordInputs[0], "password is empty !")
@@ -212,19 +233,15 @@ export class Settings {
             }
             const newPass = pass;
 
-            let userUpdate = {
-                login,
-                pass: newPass,
-            }
 
             const users = this.local.getUsers();
-            this.local.updateUser(users, this.user, newPass);
+            this.user = this.local.updateUser(users, this.user, newPass);
 
             this.local.sessionClear();
-            this.local.sessionUpdate(userUpdate);
+            this.local.sessionUpdate(this.user);
 
             window.location.href = "./notes.html";
-            
+
         });
     }
 

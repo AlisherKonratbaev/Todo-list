@@ -7,19 +7,62 @@ export class LocalData {
 
     getUsers() {
         return JSON.parse(localStorage.getItem("users")) || [];
+    }
+    addNewUser(users, newUser) {
+        users.push(newUser);
+        this.updateAllUsers(users);
+    }
+    deleteUser(users, id) {
+        let login;
+        users.forEach((user, i, arr) => {
+            if (user.id == id) {
+                login = user.login;
+                arr.splice(i, 1);
+            }
+        });
+        this.updateAllUsers(users);
 
+        this.deleteUserInNotesDB(login);
+    }
+    deleteUserInNotesDB(login) {
+        console.log(login);
+        const notesDB = this.getNotesDB();
+        console.log(notesDB)
+        notesDB.forEach((item, i, arr) => {
+            if (item.user == login) {
+                arr.splice(i, 1);
+            }
+        })
+
+        this.updateNotesDB(notesDB);
+    }
+
+    updateUser(users, currentUser, newPass) {
+        let current;
+        users.forEach(user => {
+            if (user.login == currentUser.login) {
+                user.pass = newPass;
+                current = user;
+            }
+        })
+        this.updateAllUsers(users);
+        return current;
+    }
+    updateUserPermissions(users, updateUser) {
+        users.forEach(user => {
+            if (user.login == updateUser.login) {
+                user.permissions.canAdd = updateUser.permissions.canAdd;
+                user.permissions.canEdit = updateUser.permissions.canEdit;
+                user.permissions.canDelete = updateUser.permissions.canDelete;
+                user.pass = updateUser.pass;
+                user.role = updateUser.role
+            }
+        });
+        this.updateAllUsers(users);
     }
 
     updateAllUsers(users) {
         localStorage.setItem("users", JSON.stringify(users));
-    }
-    updateUser(users, currentUser, newPass) {
-        users.forEach(user =>{
-            if(user.login == currentUser.login) {
-                user.pass = newPass;
-            }
-        })
-        this.updateAllUsers(users);
     }
 
     sessionClear() {
@@ -81,7 +124,32 @@ export class LocalData {
                     if (note.id == newNote.id) {
                         note.date = newNote.date;
                         note.title = newNote.title;
-                        note.important = newNote.important;
+                    }
+                });
+            }
+        });
+
+        this.updateNotesDB(notesDB);
+    }
+    changeInCategory(notesDB, user, category, index) {
+
+
+        let important = category == "important";
+        let status;
+
+        if (important) {
+            status = "warning";
+        } else {
+            status = category == "done" ? "done" : "warning";
+        }
+
+
+        notesDB.forEach(item => {
+            if (item.user == user.login) {
+                item.notes.forEach(note => {
+                    if (note.id == index) {
+                        note.important = important;
+                        note.status = status;
                     }
                 });
             }
