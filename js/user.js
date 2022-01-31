@@ -235,7 +235,7 @@ export class Settings {
 
 
             const users = this.local.getUsers();
-            this.user = this.local.updateUser(users, this.user, newPass);
+            this.user = this.local.updatePassword(users, this.user, newPass);
 
             this.local.sessionClear();
             this.local.sessionUpdate(this.user);

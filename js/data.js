@@ -21,23 +21,19 @@ export class LocalData {
             }
         });
         this.updateAllUsers(users);
-
         this.deleteUserInNotesDB(login);
     }
     deleteUserInNotesDB(login) {
-        console.log(login);
         const notesDB = this.getNotesDB();
-        console.log(notesDB)
         notesDB.forEach((item, i, arr) => {
             if (item.user == login) {
                 arr.splice(i, 1);
             }
         })
-
         this.updateNotesDB(notesDB);
     }
 
-    updateUser(users, currentUser, newPass) {
+    updatePassword(users, currentUser, newPass) {
         let current;
         users.forEach(user => {
             if (user.login == currentUser.login) {
@@ -48,14 +44,14 @@ export class LocalData {
         this.updateAllUsers(users);
         return current;
     }
-    updateUserPermissions(users, updateUser) {
+    updateUser(users, updateUser) {
         users.forEach(user => {
             if (user.login == updateUser.login) {
                 user.permissions.canAdd = updateUser.permissions.canAdd;
                 user.permissions.canEdit = updateUser.permissions.canEdit;
                 user.permissions.canDelete = updateUser.permissions.canDelete;
                 user.pass = updateUser.pass;
-                user.role = updateUser.role
+                user.role = updateUser.role;
             }
         });
         this.updateAllUsers(users);
@@ -103,7 +99,7 @@ export class LocalData {
         this.updateNotesDB(notesDB);
     }
 
-    delateNote(notesDB, user, index) {
+    deleteNote(notesDB, user, index) {
         notesDB.forEach(item => {
             if (item.user == user.login) {
                 item.notes.forEach((note, i, arr) => {
@@ -132,8 +128,6 @@ export class LocalData {
         this.updateNotesDB(notesDB);
     }
     changeInCategory(notesDB, user, category, index) {
-
-
         let important = category == "important";
         let status;
 
@@ -142,7 +136,6 @@ export class LocalData {
         } else {
             status = category == "done" ? "done" : "warning";
         }
-
 
         notesDB.forEach(item => {
             if (item.user == user.login) {
@@ -154,7 +147,6 @@ export class LocalData {
                 });
             }
         });
-
         this.updateNotesDB(notesDB);
     }
 

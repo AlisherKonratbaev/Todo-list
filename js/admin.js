@@ -9,14 +9,14 @@ export class Admin {
         }
         this.local = new LocalData();
 
-        if (!this.verify()) {
+        if (this.verify()) {
             this.initDOMElemets();
             this.creatUser();
             this.showUsers();
             this.deleteUsers();
             this.change();
+            this.goBack();
         }
-
     }
 
     verify() {
@@ -30,31 +30,46 @@ export class Admin {
         else if (this.user.role != "admin") {
             window.location.href = `./notes.html`;
             flag = false;
-        }
+        } else flag = true;
 
         return flag;
-
     }
 
     initDOMElemets() {
         this.wrap = document.querySelector(".admin__block-wrap");
-
         this.usersWrap = document.querySelector(".users__wrap");
-
         this.loginEl = document.querySelector("#login");
         this.passEl = document.querySelector("#pass");
         this.showPassEl = document.querySelector(".show_pass");
         this.isAdminEl = document.querySelector("#isAdmin");
         this.creatBtn = document.querySelector("#creat");
         this.overlay = document.querySelector(".overlay");
-
+        this.backEl = document.querySelector(".admin__block-back");
         this.users = this.local.getUsers();
     }
 
+    showUsers() {
+        this.users = this.local.getUsers();
+
+        this.usersList = document.createElement("ul");
+
+        const itemsHtml = this.users.filter(user => (user.login != "admin" && user.login != this.user.login))
+            .map((user, index) => {
+                return `
+                <li class="user-item" data-index = ${user.id}>
+                    <p><span>${index + 1}</span>${user.login}</p>
+                    <div>
+                        <button type="button" class="btn btn-danger delete btn-sm">Delete</button>
+                        <button type="button" class="btn btn-info edit btn-sm">Change</button>
+                    </div>
+                </li>`;
+            });
+        this.usersList.innerHTML = itemsHtml.join("");
+        this.usersWrap.append(this.usersList);
+    }
+
     creatUser() {
-
         this.showPassword(this.passEl, this.showPassEl);
-
 
         this.creatBtn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -89,7 +104,6 @@ export class Admin {
                     this.showMessage(this.loginEl, "Login is already taken");
                 }
             }
-
         });
     }
     addUser(newUser) {
@@ -107,29 +121,9 @@ export class Admin {
     }
 
 
-    showUsers() {
-        this.users = this.local.getUsers();
-
-        this.usersList = document.createElement("ul");
-
-        const itemsHtml = this.users.filter(user => (user.login != "admin" && user.login != this.user.login))
-            .map((user, index) => {
-                return `
-                <li class="user-item" data-index = ${user.id}>
-                    <p><span>${index + 1}</span>${user.login}</p>
-                    <div>
-                        <button type="button" class="btn btn-danger delate btn-sm">Delete</button>
-                        <button type="button" class="btn btn-info edit btn-sm">Change</button>
-                    </div>
-                </li>`;
-            });
-        this.usersList.innerHTML = itemsHtml.join("");
-        this.usersWrap.append(this.usersList);
-    }
-
     deleteUsers() {
         this.usersWrap.addEventListener("click", (e) => {
-            if (!e.target.matches("button.delate")) return
+            if (!e.target.matches("button.delete")) return
             const id = e.target.closest(".user-item").dataset.index;
             e.target.closest(".user-item").remove();
             this.showNotification("notification", "User deleted");
@@ -147,13 +141,9 @@ export class Admin {
             this.save();
             this.closeModal();
         });
-
-        
-
     }
 
     openModal(id) {
-       
         let user = { ...this.users.find(user => user.id == id) }
 
         this.modalWrap = document.createElement("div");
@@ -193,35 +183,29 @@ export class Admin {
 
         this.overlay.classList.add("show");
         this.wrap.insertAdjacentElement("afterend", this.modalWrap);
-        
     }
+    getPremissions(permissions) {
+        let active = "", notActive = "";
 
-    closeModal() {
-        this.modal = document.querySelector(".modal");
-        this.overlay.addEventListener("click", (e) => {
-            this.overlay.classList.remove("show");
-            this.modal.remove();
-            this.modalWrap.remove();
-        })
-
-        const modalCross = document.querySelector(".modal__cross");
-        modalCross.addEventListener("click", (e) => {
-            this.overlay.classList.remove("show");
-            // this.openModal = false;
-            this.modal.remove();
-            this.modalWrap.remove();
-        })
-
-        const modalExitBtn = document.querySelector("#modal__exit");
-        modalExitBtn.addEventListener("click", () => {
-            this.overlay.classList.remove("show");
-            this.modal.remove();
-            this.modalWrap.remove();
-        })
+        for (let key in permissions) {
+            if (permissions[key]) {
+                active += `<div class="modal__item" draggable="true" data-permission="${key}">${key}</div>`
+            } else {
+                notActive += `<div class="modal__item" draggable="true" data-permission="${key}">${key}</div>`
+            }
+        }
+        return `
+            <div class="box" data-id="active">
+                Active
+            ${active}
+            </div>
+            <div class="box" data-id="notActive">
+                Not active
+                ${notActive}
+            </div>`;
     }
 
     modalDragAndDrop(id) {
-        
         let user = this.users.find(user => user.id == id);
         this.stateUser = JSON.parse(JSON.stringify(user))
         if (!this.stateUser) return;
@@ -229,16 +213,14 @@ export class Admin {
         const boxes = document.querySelectorAll(".box");
         let current, permissionBox, permission;
 
-
         const dragStart = function (item) {
             item.className += ' hold';
-            console.log(1);
             setTimeout(() => { item.className += ' invisable' }, 0);
         };
 
         const dragEnd = function (item) {
             item.className = 'modal__item';
-            
+
         }
 
         const dragOver = function (e) {
@@ -280,8 +262,6 @@ export class Admin {
             box.addEventListener('dragleave', dragLeave);
             box.addEventListener('drop', dragDrop);
         }
-        
-       
     }
 
     checkState(permission, permissionBox) {
@@ -290,29 +270,8 @@ export class Admin {
         } else if (permissionBox == "notActive") {
             this.stateUser.permissions[permission] = false;
         }
-
     }
-    getPremissions(permissions) {
-        let active = "", notActive = "";
 
-        for (let key in permissions) {
-            if (permissions[key]) {
-                active += `<div class="modal__item" draggable="true" data-permission="${key}">${key}</div>`
-            } else {
-                notActive += `<div class="modal__item" draggable="true" data-permission="${key}">${key}</div>`
-            }
-        }
-
-        return `
-            <div class="box" data-id="active">
-                Active
-            ${active}
-            </div>
-            <div class="box" data-id="notActive">
-                Not active
-                ${notActive}
-            </div>`;
-    }
 
     save() {
         const loginEl = document.querySelector("#login__modal")
@@ -322,7 +281,6 @@ export class Admin {
         const saveBtn = document.querySelector("#modal__save");
 
         this.showPassword(passEl, showPassEl)
-
         saveBtn.addEventListener("click", (e) => {
             if (passEl.value == "") {
                 this.showMessage(passEl, "Password is empty !")
@@ -331,15 +289,42 @@ export class Admin {
             isAdminEl.checked ? this.stateUser.role = "admin" : this.stateUser.role = "user";
             this.stateUser.pass = passEl.value;
 
-            this.local.updateUserPermissions(this.users, this.stateUser)
+            this.local.updateUser(this.users, this.stateUser)
 
             this.overlay.classList.remove("show");
             this.modal.remove();
             this.modalWrap.remove();
         })
     }
+    closeModal() {
+        this.modal = document.querySelector(".modal");
+        this.overlay.addEventListener("click", (e) => {
+            this.overlay.classList.remove("show");
+            this.modal.remove();
+            this.modalWrap.remove();
+        })
 
+        const modalCross = document.querySelector(".modal__cross");
+        modalCross.addEventListener("click", (e) => {
+            this.overlay.classList.remove("show");
+            this.modal.remove();
+            this.modalWrap.remove();
+        })
 
+        const modalExitBtn = document.querySelector("#modal__exit");
+        modalExitBtn.addEventListener("click", () => {
+            this.overlay.classList.remove("show");
+            this.modal.remove();
+            this.modalWrap.remove();
+        })
+    }
+
+    goBack() {
+        this.backEl.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.location.href = "./notes.html";
+        })
+    }
     showPassword(passEl, showPassEl) {
         showPassEl.addEventListener("change", (e) => {
             showPassEl.checked ? passEl.type = "text" : passEl.type = "password";

@@ -50,93 +50,61 @@ export class Note {
     noteOperations() {
         this.showNotes();
 
-        this.addNote();
+        if (this.user.permissions.canAdd) {
+            this.addNote();
+        } else {
+            document.querySelector(".form-wrap").classList.add("hide");
+        }
+
+        if (this.user.permissions.canEdit) {
+            this.editNotes();
+        } else {
+            document.querySelectorAll(".edit").forEach(btn => {
+                btn.classList.add("hide");
+            });
+        }
+
+        if (this.user.permissions.canDelete) {
+            this.deleteNote();
+        } else {
+            document.querySelectorAll(".delete").forEach(btn => {
+                btn.classList.add("hide");
+            })
+        }
+
+        if (this.user.role == "user") {
+            document.querySelector('[href="./permissions.html"]').parentElement.remove();
+        }
+
         this.changeStatus();
-        this.delateNote();
-        this.editNotes();
     }
 
     showNotes() {
-
         if (!this.userNotes) return;
-
         let notesHtml = this.userNotes.notes.map(note => {
             let important = note.important ? "important" : "";
             let done = note.status == "done" ? "done" : "";
+            let delBtn, editBtn
+            this.user.permissions.canDelete
+                ? delBtn = '<button type="button" class="btn btn-danger delete">Delete</button>'
+                : delBtn = "";
+            this.user.permissions.canEdit
+                ? editBtn = '<button type="button" class="btn btn-info edit">Edit</button>'
+                : editBtn = "";
+
             return `
                     <div class="item" data-index = "${note.id}" data-modal="${note.id}">
                         <span class="dots ${important} ${done}"></span>
                         <p class="note__title ${done}">${note.title}</p>
                         <p class="note__date ${done}">${note.date}</p>
-                        <button type="button" class="btn btn-danger delate">Delate</button>
-                        <button type="button" class="btn btn-info edit">Edit</button>
+                        ${delBtn}
+                        ${editBtn}
                     </div>
                 `;
         });
 
         this.notesWrap.innerHTML = notesHtml.join("");
         this.searchNotes();
-    }
-
-    addNote() {
-
-        this.addNoteBtn.addEventListener("click", (e) => {
-
-            let date = this.noteDate.valueAsDate;
-            if (date) date.setHours(0, 0, 0);
-            else date = new Date();
-
-            let title = this.noteTitle.value.trim();
-            if (title == "") {
-                this.showMessage(this.noteTitle, "message", "Fill in the title field");
-                return;
-            }
-
-            let id, amountOfNotes = this.userNotes.notes.length;
-            if (amountOfNotes != 0) id = this.userNotes.notes[amountOfNotes - 1].id + 1;
-            else id = amountOfNotes;
-
-            let tempNote = {
-                id,
-                title,
-                date: this.getDateFormat(date),
-                important: this.noteCheckbox.checked,
-                status: "warning",
-            };
-
-            this.local.addNote(this.notesDB, this.user, tempNote);
-
-            this.clearInputs();
-            this.showNotes();
-            this.showNotification("notification", "Note added");
-        })
-
-    }
-
-    changeStatus() {
-        this.notesWrap.addEventListener("click", (e) => {
-            if (e.target.matches("p")) {
-                e.target.parentElement.children[0].classList.toggle("done")
-                e.target.parentElement.children[1].classList.toggle("done")
-                e.target.parentElement.children[2].classList.toggle("done");
-
-                let index = e.target.parentElement.dataset.index;
-
-                this.local.changeStatus(this.notesDB, this.user, index);
-
-            }
-        })
-    }
-
-    delateNote() {
-        this.notesWrap.addEventListener("click", (e) => {
-            if (e.target.classList.contains("delate")) {
-                let index = e.target.parentElement.dataset.index;
-                e.target.parentElement.remove();
-                this.local.delateNote(this.notesDB, this.user, index);
-                this.showNotification("notification", "Note deleted");
-            }
-        });
     }
 
     searchNotes() {
@@ -167,16 +135,70 @@ export class Note {
         });
     }
 
+    addNote() {
+        this.addNoteBtn.addEventListener("click", (e) => {
+
+            let date = this.noteDate.valueAsDate;
+            if (date) date.setHours(0, 0, 0);
+            else date = new Date();
+
+            let title = this.noteTitle.value.trim();
+            if (title == "") {
+                this.showMessage(this.noteTitle, "message", "Fill in the title field");
+                return;
+            }
+
+            let id, amountOfNotes = this.userNotes.notes.length;
+            if (amountOfNotes != 0) id = this.userNotes.notes[amountOfNotes - 1].id + 1;
+            else id = amountOfNotes;
+
+            let tempNote = {
+                id,
+                title,
+                date: this.getDateFormat(date),
+                important: this.noteCheckbox.checked,
+                status: "warning",
+            };
+
+            this.local.addNote(this.notesDB, this.user, tempNote);
+
+            this.clearInputs();
+            this.showNotes();
+            this.showNotification("notification", "Note added");
+        })
+    }
+
+    changeStatus() {
+        this.notesWrap.addEventListener("click", (e) => {
+            if (e.target.matches("p")) {
+                e.target.parentElement.children[0].classList.toggle("done")
+                e.target.parentElement.children[1].classList.toggle("done")
+                e.target.parentElement.children[2].classList.toggle("done");
+
+                let index = e.target.parentElement.dataset.index;
+                this.local.changeStatus(this.notesDB, this.user, index);
+            }
+        })
+    }
+
+    deleteNote() {
+        this.notesWrap.addEventListener("click", (e) => {
+            if (e.target.classList.contains("delete")) {
+                let index = e.target.parentElement.dataset.index;
+                e.target.parentElement.remove();
+                this.local.deleteNote(this.notesDB, this.user, index);
+                this.showNotification("notification", "Note deleted");
+            }
+        });
+    }
 
     editNotes() {
         this.notesWrap.addEventListener("click", (e) => {
             if (!e.target.classList.contains("edit")) return
             const modalId = e.target.parentElement.dataset.modal;
-
             this.openModal(modalId);
 
             const modal = document.querySelector(".modal")
-
             modal.addEventListener("click", (e) => {
                 if (!e.target.matches("button")) return
                 const formEl = modal.querySelector("form")
@@ -191,7 +213,6 @@ export class Note {
                     return;
                 }
 
-
                 let newNote = {
                     id: modalId,
                     date: newDate,
@@ -204,7 +225,6 @@ export class Note {
                 this.overlay.classList.remove("show");
                 this.showNotification("notification", "Note changed");
                 this.showNotes();
-
             });
         });
     }
@@ -231,9 +251,7 @@ export class Note {
         `;
         this.overlay.classList.add("show");
         this.notesWrap.insertAdjacentHTML("afterend", modalHtml)
-
         this.closeModal();
-
     }
 
     closeModal() {
@@ -267,8 +285,8 @@ export class Note {
             }, 500);
 
         }, 2000);
-
     }
+
     showMessage(element, className, text) {
         const message = document.createElement("p");
         message.classList.add(className);
@@ -296,7 +314,6 @@ export class Note {
 }
 
 export class Categories {
-
     constructor() {
         if (!window.location.href.includes("categories.html")) {
             return;
@@ -321,7 +338,6 @@ export class Categories {
         this.doneEl = document.querySelector("[data-category='done']")
 
         this.noteDate = document.querySelector("#note__date");
-        // this.notesWrap = document.querySelector(".todo-wrap");
         this.noteTitle = document.querySelector("#note__title");
         this.noteCheckbox = document.querySelector("#note__checkbox");
         this.addNoteBtn = document.querySelector("#note__add");
@@ -334,10 +350,35 @@ export class Categories {
 
     noteOperations() {
         this.showNotes();
-        this.changeNotes();
-        this.addNote();
-        this.delateNote();
-        this.editNotes();
+
+        if (this.user.permissions.canAdd) {
+            this.addNote();
+        } else {
+            document.querySelector(".form-wrap").classList.add("hide");
+        }
+
+        if (this.user.permissions.canEdit) {
+            this.editNotes();
+        } else {
+            document.querySelectorAll(".edit").forEach(btn => {
+                btn.classList.add("hide");
+            });
+        }
+
+        if (this.user.permissions.canDelete) {
+            this.deleteNote();
+        } else {
+            document.querySelectorAll(".delete").forEach(btn => {
+                btn.classList.add("hide");
+            })
+        }
+
+        if (this.user.role == "user") {
+            document.querySelector('[href="./permissions.html"]').parentElement.remove();
+        }
+
+        this.changeStatus();
+
     }
     showNotes() {
         const inProcessNotes = [];
@@ -353,29 +394,33 @@ export class Categories {
         this.inProcessEl.innerHTML = inProcessNotes.join("");
         this.importantEl.innerHTML = imporatantNotes.join("");
         this.doneEl.innerHTML = doneNotes.join("");
-
     }
 
-
     getNote(note) {
+        let delBtn, editBtn;
+        this.user.permissions.canDelete
+            ? delBtn = '<button type="button" class="btn btn-danger delete btn-sm">Delete</button>'
+            : delBtn = "";
+        this.user.permissions.canEdit
+            ? editBtn = '<button type="button" class="btn btn-info edit btn-sm">Edit</button>'
+            : editBtn = "";
         return `
             <div class="note" data-index="${note.id}" data-modal="${note.id}" draggable="true">
                 <div class="note__title">${note.title}</div>
                 <div class="note__info-box">
                     <div class="note__date">${note.date}</div>
-                    <button type="button" class="btn btn-danger delate btn-sm">Delate</button>
-                    <button type="button" class="btn btn-info edit btn-sm">Edit</button>
+                    <div>
+                        ${delBtn}
+                        ${editBtn}
+                    </div> 
                 </div>
             </div>
         `;
     }
 
-    changeNotes() {
-
+    changeStatus() {
         const categoryItems = this.categoriesEl.querySelectorAll(".category__item");
-
         let current;
-
         const dragStart = function (note) {
             note.className += ' hold';
             setTimeout(() => { note.className += ' invisable' }, 0);
@@ -387,7 +432,6 @@ export class Categories {
 
         const dragOver = function (e) {
             e.preventDefault()
-
         }
 
         const dragEnter = function (e) {
@@ -398,7 +442,6 @@ export class Categories {
         const dragLeave = function () {
             this.className = 'category__item';
         }
-
 
         const dragDrop = function () {
             this.className = 'category__item';
@@ -437,11 +480,9 @@ export class Categories {
             item.addEventListener('dragleave', dragLeave);
             item.addEventListener('drop', dragDrop);
         }
-
     }
 
     addNote() {
-
         this.addNoteBtn.addEventListener("click", (e) => {
             let date = this.noteDate.valueAsDate;
             if (date) date.setHours(0, 0, 0);
@@ -466,21 +507,18 @@ export class Categories {
             };
 
             this.local.addNote(this.notesDB, this.user, tempNote);
-
             this.clearInputs();
             this.showNotes()
-
             this.showNotification("notification", "Note added");
         })
-
     }
 
-    delateNote() {
+    deleteNote() {
         this.categoriesEl.addEventListener("click", (e) => {
-            if (e.target.classList.contains("delate")) {
+            if (e.target.classList.contains("delete")) {
                 let index = e.target.closest(".note").dataset.index;
                 e.target.closest(".note").remove();
-                this.local.delateNote(this.notesDB, this.user, index);
+                this.local.deleteNote(this.notesDB, this.user, index);
                 this.showNotification("notification", "Note deleted");
             }
         })
@@ -492,13 +530,10 @@ export class Categories {
             const modalId = e.target.closest(".note").dataset.modal;
 
             this.openModal(modalId);
-
             const modal = document.querySelector(".modal")
-
             modal.addEventListener("click", (e) => {
                 if (!e.target.matches("button")) return
                 const formEl = modal.querySelector("form")
-
                 let newDate = formEl[0].valueAsDate;
                 if (newDate) newDate.setHours(0, 0, 0);
                 else newDate = new Date();
@@ -508,7 +543,6 @@ export class Categories {
                     this.showMessage(formEl[0], "message", "Fill in the title field.")
                     return;
                 }
-
 
                 let newNote = {
                     id: modalId,
@@ -522,7 +556,6 @@ export class Categories {
                 this.overlay.classList.remove("show");
                 this.showNotification("notification", "Note changed");
                 this.showNotes();
-
             });
         });
     }
@@ -551,7 +584,6 @@ export class Categories {
         this.categoriesEl.insertAdjacentHTML("afterend", modalHtml)
 
         this.closeModal();
-
     }
 
     closeModal() {

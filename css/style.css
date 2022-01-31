@@ -130,7 +130,7 @@ header .dropdown {
 	margin-right: 80px;
 }
 main{
-	height: 100vh;
+	min-height: 100vh;
 }
 .todo-wrap{
 	margin-top: 20px;
@@ -182,7 +182,7 @@ main{
 .todo-wrap .item p.done{
 	text-decoration: line-through;
 }
-.todo-wrap .item .delate{
+.todo-wrap .item .delete{
 	margin-right: 40px;
 }
 .todo-wrap .item .edit {
@@ -311,11 +311,16 @@ main{
 	padding: 10px;
 }
 .category__item +.category__item{
-	border-left: 1px solid #2C3E50;
-	
+	border-left: 1px solid #2C3E50;	
 }
 .category__title{
 	margin-bottom: 10px;
+}
+.category__item{
+	min-height: 400px;
+}
+.category__item .delete {
+	margin-right: 10px;
 }
 .categories .note{
 	padding: 10px;
@@ -340,11 +345,13 @@ main{
 	background-color: rgb(129, 115, 115);
 	
 }
-.invisable{
+.invisable, .modal__wrap .invisable{
 	border: 1px dashed #2C3E50;
 	padding: 10px;
 	margin-bottom: 20px;
+	background-color: rgba(60, 150, 202, 0.685);
 }
+
 .admin {
 	background-color: transparent;
 }
@@ -355,7 +362,14 @@ main{
 	position: relative;
 	
 }
-
+.admin__block-back{
+	position: absolute;
+    left: 0px;
+    top: 5px;
+    display: inline-block;
+    width: 80px;
+    border-radius: 0 3px 3px 0;
+}
 .admin__block-wrap{
 	display: flex;
 	justify-content: space-between;
@@ -397,8 +411,8 @@ main{
 	margin-left:15px;
 }
 #admin__block .modal{
-	width: 600px;
-	height: 600px;
+	width: 520px;
+	height: 580px;
 }
 #modal__admin-form{
 	width: 80%;
@@ -415,8 +429,8 @@ main{
 }
 
 .modal__wrap .box{
-	width: 45%;
-	height: 300px;
+	width: 48%;
+	height: 270px;
 	border: 1px solid #000;
 }
 .modal__item{
@@ -429,10 +443,10 @@ main{
     margin: 0 auto 20px;
 }
 .modal__item:first-child{
-	margin-top: 30px;
+	margin-top: 25px;
 }
 
 .modal__btns{
 	text-align: right;
-	margin-top: 10px;
+	margin-top: 14px;
 }
