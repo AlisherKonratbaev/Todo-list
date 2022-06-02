@@ -5,6 +5,7 @@ Multifunctional to-do list in javascript. Implemented authorization and registra
 
 
 ## Demo
+https://todo-list-dusky-sigma.vercel.app/
 
 ## Technologies used
 javascript, html,css
